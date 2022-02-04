@@ -26,6 +26,8 @@ import org.apache.synapse.commons.SynapseCommonsException;
 
 import javax.xml.namespace.QName;
 import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
 /**
  * This class will be used as a Helper class to get the properties loaded while building the
@@ -52,7 +54,15 @@ public class PropertyHelper {
         Method method;
 
         try {
-            Method[] methods = obj.getClass().getMethods();
+            Method[] methods = Arrays.stream(obj.getClass().getMethods())
+                    .filter(m->m.getParameterCount()==1)
+                    .filter(m->mName.equals(m.getName()))
+                    .toArray(Method[]::new);
+            if(methods.length > 1) {
+                log.warn("Did find multiple implementations of a setter method named : " + mName +
+                        "(). Found the following competing implementations : " + Arrays.stream(methods).map(Method::toString).collect(Collectors.joining(", ")) +
+                        ".");
+            }
             boolean invoked = false;
 
             for (Method method1 : methods) {

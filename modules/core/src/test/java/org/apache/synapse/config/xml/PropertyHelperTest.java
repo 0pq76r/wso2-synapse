@@ -19,6 +19,8 @@ package org.apache.synapse.config.xml;
 
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.util.AXIOMUtil;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.SynapseException;
 import org.junit.Assert;
 import org.junit.Rule;
@@ -83,6 +85,13 @@ public class PropertyHelperTest {
         name = "omElementParameter";
         PropertyHelper.setInstanceProperty(name, element, pojoInstance);
         Assert.assertEquals("parameter must be set by the method", element, pojoInstance.getOmElementParameter());
+
+        name = "ambiguousParameter";
+        try {
+            PropertyHelper.setInstanceProperty(name, "1", pojoInstance);
+        } catch (Exception ignored){
+            /* setInstanceProperty may or may not throw an exception */
+        }
     }
 
     /**
@@ -200,6 +209,13 @@ class PojoClass {
     }
 
     public void setIntParameter(int intParameter) {
+        this.intParameter = intParameter;
+    }
+
+    public void setAmbiguousParameter(short intParameter) {
+        this.intParameter = intParameter;
+    }
+    public void setAmbiguousParameter(int intParameter) {
         this.intParameter = intParameter;
     }
 }

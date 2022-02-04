@@ -25,6 +25,8 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.SynapseException;
 
 import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.stream.Collectors;
 import javax.xml.namespace.QName;
 
 /**
@@ -51,7 +53,15 @@ public class PropertyHelper {
         Method method;
 
         try {
-            Method[] methods = obj.getClass().getMethods();
+            Method[] methods = Arrays.stream(obj.getClass().getMethods())
+                    .filter(m->m.getParameterCount()==1)
+                    .filter(m->mName.equals(m.getName()))
+                    .toArray(Method[]::new);
+            if(methods.length > 1) {
+                log.warn("Did find multiple implementations of a setter method named : " + mName +
+                        "(). Found the following competing implementations : " + Arrays.stream(methods).map(Method::toString).collect(Collectors.joining(", ")) +
+                        ".");
+            }
             boolean invoked = false;
 
             for (Method method1 : methods) {
